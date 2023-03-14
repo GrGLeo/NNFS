@@ -113,3 +113,55 @@ class Optimizer_RMSprop:
     #Call once after parameters update
     def post_update_params(self):
         self.iteration+=1
+
+
+#Adam Optimize
+class Optimizer_Adam:
+    #Initialize optimizer - set settings
+    # learning rate of 1 is the default parameter
+    def __init__(self, learning_rate= 0.001, decay=0., epsilon=1e-7,beta1=0.9,beta2=0.999):
+        self.learning_rate = learning_rate
+        self.current_learning_rate = learning_rate
+        self.decay = decay
+        self.iteration = 0
+        self.epsilon = epsilon
+        self.beta1 = beta1
+        self.beta2 = beta2
+
+    #Call once before parameters update
+    def pre_update_params(self):
+        if self.decay:
+            self.current_learning_rate = self.learning_rate * (1. / (1. + self.decay*self.iteration))
+
+    #Update parameter
+    def update_params(self,layer):
+        #If we use momentum
+        if not hasattr(layer, 'weight_cache'):
+            layer.weight_momentum = np.zeros_like(layer.weights)
+            layer.weight_cache = np.zeros_like(layer.weights)
+            layer.bias_momentum = np.zeros_like(layer.biases)
+            layer.bias_cache = np.zeros_like(layer.biases)
+
+        # Update momentum with currents gradients
+        layer.weight_momentum = self.beta1 * layer.weight_momentum + (1 - self.beta1) * layer.dweights
+        layer.bias_momentum = self.beta1 * layer.bias_momentum + (1 - self.beta1) * layer.dbiases
+        # Get corrected momentum
+        weight_momentum_corrected = layer.weight_momentum / (1 - self.beta1 ** (self.iteration + 1))
+        bias_momentum_corrected = layer.bias_momentum / (1 - self.beta1 ** (self.iteration +1))
+
+        # Update cache with currents grandients
+        layer.weight_cache = self.beta2*layer.weight_cache + (1-self.beta2) * layer.dweights**2
+        layer.bias_cache = self.beta2*layer.bias_cache + (1-self.beta2) * layer.dbiases**2
+        # Get corrected cache
+        weight_cache_corrected = layer.weight_cache / (1 - self.beta2 ** (self.iteration + 1))
+        bias_cache_corrected = layer.bias_cache / (1 - self.beta2 ** (self.iteration + 1))
+
+        #weihgts and biases update
+        layer.weights += -self.current_learning_rate*weight_momentum_corrected / \
+            (np.sqrt(weight_cache_corrected) + self.epsilon)
+        layer.biases += -self.current_learning_rate*bias_momentum_corrected / \
+            (np.sqrt(bias_cache_corrected) + self.epsilon)
+
+    #Call once after parameters update
+    def post_update_params(self):
+        self.iteration+=1
