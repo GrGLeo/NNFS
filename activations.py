@@ -2,7 +2,7 @@ import numpy as np
 
 #ReLU activation
 class Activation_ReLU:
-    
+
     #Forward pass
     def forward(self,inputs):
         self.inputs = inputs
@@ -13,7 +13,7 @@ class Activation_ReLU:
         self.dinputs = dvalues.copy()
         self.dinputs[self.inputs <= 0] = 0
 
-        
+
 
 # Softmax activation
 class Activation_Softmax:
@@ -45,4 +45,13 @@ class Activation_Softmax:
             self.dinputs[index] = np.dot(jacobian_matrix, single_dvalues)
 
 
+class Activation_Sigmoid:
 
+    # Forward pass
+    def forward(self,inputs):
+        self.inputs = inputs
+        self.output = 1 / (1 + np.exp(-inputs))
+
+    # Backward pass
+    def backward(self,dvalues):
+        self.dinputs = dvalues *  (1 - self.output) * self.output

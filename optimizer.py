@@ -156,7 +156,7 @@ class Optimizer_Adam:
         weight_cache_corrected = layer.weight_cache / (1 - self.beta2 ** (self.iteration + 1))
         bias_cache_corrected = layer.bias_cache / (1 - self.beta2 ** (self.iteration + 1))
 
-        #weihgts and biases update
+        #weights and biases update
         layer.weights += -self.current_learning_rate*weight_momentum_corrected / \
             (np.sqrt(weight_cache_corrected) + self.epsilon)
         layer.biases += -self.current_learning_rate*bias_momentum_corrected / \
