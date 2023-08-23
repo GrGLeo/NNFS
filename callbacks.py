@@ -15,7 +15,6 @@ class EarlyStopping:
         Check if current loss is better than past epoch loss
         else start counting patience
         """
-
         if loss < self.loss:
             self.loss = loss
             self.wait = 0
